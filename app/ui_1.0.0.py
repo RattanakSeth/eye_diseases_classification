@@ -4,10 +4,14 @@ import tkinter.messagebox
 import customtkinter
 from util.eye_diseases_dataset import EyeDiseaseDataset
 import os
-from PIL import Image
+from PIL import Image, ImageTk
 from model.dcnn import DCNN_Model
 import tensorflow as tf
-
+import tkinter as tk
+from tkinter import Label, filedialog
+# from tkinter import filedialog
+# from PIL import Image, ImageTk
+# from tkinter import filedialog
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
@@ -39,7 +43,7 @@ class App(customtkinter.CTk):
         self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text="Select Your Model:", anchor="w")
         self.appearance_mode_label.grid(row=1, column=0, padx=20, pady=(10, 0))
         self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.sidebar_frame,
-                                                                       values=["Light", "Dark", "System"],
+                                                                       values=["EffecientNetB3", "InceptionRestNetV3", "ResNet-18", "System"],
                                                                        command=self.change_appearance_mode_event)
         self.appearance_mode_optionemenu.grid(row=2, column=0, padx=20, pady=(10, 10))
 
@@ -47,7 +51,8 @@ class App(customtkinter.CTk):
 
         self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text="Appearance Mode:", anchor="w")
         self.appearance_mode_label.grid(row=5, column=0, padx=20, pady=(10, 0))
-        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.sidebar_frame, values=["Sequential + DCNN", "Dark", "System"],
+        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.sidebar_frame,
+                                                                       values=["Light", "Dark", "System"],
                                                                        command=self.change_appearance_mode_event)
         self.appearance_mode_optionemenu.grid(row=6, column=0, padx=20, pady=(10, 10))
         self.scaling_label = customtkinter.CTkLabel(self.sidebar_frame, text="UI Scaling:", anchor="w")
@@ -87,7 +92,7 @@ class App(customtkinter.CTk):
         # self.combobox_1 = customtkinter.CTkComboBox(self.tabview.tab("CTkTabview"),
         #                                             values=["Value 1", "Value 2", "Value Long....."])
         # self.combobox_1.grid(row=1, column=0, padx=20, pady=(10, 10))
-        self.string_input_button = customtkinter.CTkButton(self.right_sidebar_frame, text="Open Insert BST", command=self.open_input_dialog_event)
+        self.string_input_button = customtkinter.CTkButton(self.right_sidebar_frame, text="Open Insert", command=self.imageUploader)
         self.string_input_button.grid(row=2, column=0, padx=20, pady=(10, 10))
         # self.label_tab_2 = customtkinter.CTkLabel(self.tabview.tab("Tab 2"), text="CTkLabel on Tab 2")
         # self.label_tab_2.grid(row=0, column=0, padx=20, pady=20)
@@ -95,37 +100,38 @@ class App(customtkinter.CTk):
 
         # Initial Model
         # self.cnnModel = DCNN_Model()
-        self.model = tf.keras.models.load_model("../training_2/efficientnetb3-Eye Disease-92.65.h5")#self.cnnModel.loadNewModel()
-
+        # self.model = tf.keras.models.load_model("../training_2/efficientnetb3-Eye Disease-92.65.h5")#self.cnnModel.loadNewModel()
 
         # **Model Structure**
         # Start reading dataset
-
-
+        data_dir = "dataset/eye_diseases_original_dataset"
+        #
         try:
-            dataDir = '../dataset/eye_diseases_original_dataset/dataset'
-            dataSplit = EyeDiseaseDataset(dataDir)
-            # Get splitted data
-            self.train_data, self.valid_data, self.test_data = dataSplit.split_()
-            print(self.train_data)
-            # # Get Generators
-            # batch_size = 40
-            # train_gen, valid_gen, test_gen = create_gens(train_df, valid_df, test_df, batch_size)
+            dataEyeD = EyeDiseaseDataset(data_dir)
+            # # Get splitted data
+            train_df, valid_df, test_df = dataEyeD.split_data()
+            print("test dataframe shape: ", test_df.shape)
+
+            # Get Generators
+            batch_size = 10
+            train_gen, valid_gen, test_gen = dataEyeD.create_gens(train_df, valid_df, test_df, batch_size)
 
         except:
             print('Invalid Input')
+
+        print("test_gen: ", test_gen)
         # self.eye_diseases_dataset = EyeDiseaseDataset(dataDir)
         # dataSplit = EyeDiseaseDataset(dataDir)
         # self.train_data, self.valid_data, self.test_data = dataSplit.split_()
         # print(self.train_data)
 
-        self.train_augmented, self.valid_augmented, self.test_augmented = dataSplit.augment_data(self.train_data, self.valid_data, self.test_data)
+        # self.train_augmented, self.valid_augmented, self.test_augmented = dataSplit.augment_data(self.train_data, self.valid_data, self.test_data)
 
-        self.my_image = customtkinter.CTkImage(light_image=Image.open('../dataset/eye_diseases_original_dataset/dataset/cataract/0_left.jpg'),
-                                          dark_image=Image.open('../dataset/eye_diseases_original_dataset/dataset/cataract/0_left.jpg'),
-                                          size=(256, 256))  # WidthxHeight
-        # self.my_image.grid(row=0, column=1, padx=(20, 20), pady=(20, 0), sticky="nsew")
-        # self.my_image.grid_rowconfigure(4, weight=1)
+        self.my_image = customtkinter.CTkImage(light_image=Image.open(
+            'dataset/eye_diseases_original_dataset/cataract/0_left.jpg'),
+                                               dark_image=Image.open(
+                                                   'dataset/eye_diseases_original_dataset/cataract/0_left.jpg'),
+                                               size=(256, 256))  # WidthxHeight
 
         my_label = customtkinter.CTkLabel(self, text="", image=self.my_image)
         my_label.grid(row=0, column=1, padx=(20, 20), pady=(20, 0), sticky="nsew")
@@ -134,15 +140,16 @@ class App(customtkinter.CTk):
 
 
     def open_input_dialog_event(self):
-        self.textbox.configure(state=customtkinter.NORMAL)
-
-        dialog = customtkinter.CTkInputDialog(text="Type in a number:", title="BST Insertion")
-        inputValue = dialog.get_input()
-        print("Binary Search tree Insert:", inputValue)
-        # print("type of this: ", int())
-        self.bst.insert(int(inputValue))
-        self.textbox.insert("insert", "Binary Search Tree Insert: " + inputValue + "\n")
-        self.textbox.configure(state=customtkinter.DISABLED)  # configure textbox to be read-only
+        self.imageUploader()
+        # self.textbox.configure(state=customtkinter.NORMAL)
+        #
+        # dialog = customtkinter.CTkInputDialog(text="Type in a number:", title="BST Insertion")
+        # inputValue = dialog.get_input()
+        # print("Binary Search tree Insert:", inputValue)
+        # # print("type of this: ", int())
+        # self.bst.insert(int(inputValue))
+        # self.textbox.insert("insert", "Binary Search Tree Insert: " + inputValue + "\n")
+        # self.textbox.configure(state=customtkinter.DISABLED)  # configure textbox to be read-only
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
 
@@ -155,6 +162,34 @@ class App(customtkinter.CTk):
 
     def load_CNN_Model(self):
         self.cnnModel.loadNewModel()
+
+    # image uploader function
+    def imageUploader(self):
+        f_types = [('Jpg Files', '*.jpg'), ('Png Files', '*.png')]
+        filename = filedialog.askopenfilename(filetypes=f_types)
+        img = Image.open(filename)
+
+        print(img)
+        # if file is selected
+        # if len(path):
+        #
+        #     img = Image.open(path)
+        #     print("image: ", img)
+            # img = img.resize((200, 200))
+            # pic = ImageTk.PhotoImage(img)
+            # return pic
+
+            # print("path: ", path)
+
+            # re-sizing the app window in order to fit picture
+            # and buttom
+            # app.geometry("560x300")
+            # label.config(image=pic)
+            # label.image = pic
+
+        # if no file is selected, then we are displaying below message
+        # else:
+        #     print("No file is chosen !! Please choose a file.")
 
 
 if __name__ == "__main__":

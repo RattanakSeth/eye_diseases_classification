@@ -1,4 +1,5 @@
 .venv
-dataset/
+app/dataset/
 traning_2/
 traning_1/
+.idea/

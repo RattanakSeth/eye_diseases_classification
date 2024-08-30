@@ -415,7 +415,7 @@ def plot_confusion_matrix(cm, classes, normalize= False, title= 'Confusion Matri
 
 # **Model Structure**
 # Start reading dataset
-data_dir = 'dataset/eye_diseases_original_dataset/dataset'
+data_dir = 'app/dataset/eye_diseases_original_dataset/dataset'
 
 try:
     # Get splitted data

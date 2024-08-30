@@ -4,6 +4,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 import numpy as np
+from tensorflow.keras.optimizers import Adam, Adamax
 class SequentialDcnn():
     def __init__(self):
         self.checkpoint_path = "../training_2/efficientnetb3-Eye Disease-92.65.h5"
@@ -12,7 +13,9 @@ class SequentialDcnn():
         self.color = 'rgb'
 
     def loadNewModel(self):
-        return tf.keras.models.load_model(self.checkpoint_path)
+        model = tf.keras.models.load_model(self.checkpoint_path)
+        model.compile(Adamax(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+        return model
 
     #### Function to generate images from dataframe
     def create_gens(self, train_df, valid_df, test_df, batch_size):
@@ -62,6 +65,6 @@ class SequentialDcnn():
         test_image = image.img_to_array(test_image)
         test_image = np.expand_dims(test_image, axis=0)
         test_image = test_image.reshape(self.img_size[0], self.img_size[1], 3)
-        print("image width: ", self.img_size[0])
+        print("image width: ", test_image.shape)
         # result = model.predict(test_image)
         return test_image

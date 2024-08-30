@@ -6,7 +6,8 @@ import os
 #
 # model.summary()
 #
-# ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-# print(ROOT_DIR)
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+print(ROOT_DIR)
 print(os.getcwd())
-# print(os.path.join("training_2", ""))
+print(os.path.join(os.getcwd(), "training_2"))
+print(os.path.abspath("../"))

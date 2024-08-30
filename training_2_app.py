@@ -164,7 +164,7 @@ def show_images(gen):
 
 # **Model Structure**
 # Start reading dataset
-data_dir = 'dataset/eye_diseases_original_dataset/dataset'
+data_dir = 'app/dataset/eye_diseases_original_dataset/dataset'
 
 try:
     # Get splitted data
