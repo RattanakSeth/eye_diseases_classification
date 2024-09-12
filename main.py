@@ -1,3 +1,9 @@
+"""
+tensorflow==2.9.1
+Refer to app
+"""
+
+
 # import system libs
 import os
 import time
