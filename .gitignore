@@ -1,0 +1,6 @@
+.venv
+app/dataset/
+traning_2/
+traning_1/
+.idea/
+app/training/*
