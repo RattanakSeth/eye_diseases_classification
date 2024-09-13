@@ -152,19 +152,53 @@ class EyeDiseaseDataset:
     def split_data_sample_input(self):
         # train dataframe
         files, classes = self.define_paths()
-        # print("file: ", files)
-        # print("classes: ", classes)
+        print("classes: ", classes)
         df = self.define_df(files, classes)
         strat = df['labels']
-        print("df: ", df)
-        train_df, dummy_df = train_test_split(df) #train_size=0.8, shuffle=True, random_state=2, stratify=strat
-        print("train_df: ", train_df)
-        print("dummy_df: ", dummy_df)
+    
+        # train_df, dummy_df = train_test_split(df, stratify=strat, shuffle=True, train_size=0.8, random_state=None) #train_size=0.8, shuffle=True, random_state=2, stratify=strat
         # valid and test dataframe
-        strat = dummy_df['labels']
-        valid_df, test_df = train_test_split(dummy_df) # train_size=0.5, shuffle=True, random_state=2, stratify=strat
+        # strat = dummy_df['labels']
+        print("strat: ", strat)
+        valid_df, test_df = train_test_split(df, stratify=strat) # train_size=0.5, shuffle=True, random_state=2, stratify=strat
 
-        print("valid_df: ", valid_df)
-        print("test df: ", test_df)
+        return valid_df, test_df
+    
+    def create_gens_input(self, valid_df, test_df, batch_size):
+        '''
+        This function takes train, validation, and test dataframe and fit them into image data generator, because model takes data from image data generator.
+        Image data generator converts images into tensors. '''
 
-        return train_df, valid_df, test_df
+        # define model parameters
+        img_size = (224, 224)
+        channels = 3  # either BGR or Grayscale
+        color = 'rgb'
+        img_shape = (img_size[0], img_size[1], channels)
+
+        # Recommended : use custom function for test data batch size, else we can use normal batch size.
+        ts_length = len(test_df)
+        test_batch_size = max(
+            sorted([ts_length // n for n in range(1, ts_length + 1) if ts_length % n == 0 and ts_length / n <= 80]))
+        test_steps = ts_length // test_batch_size
+
+        # This function which will be used in image data generator for data augmentation, it just take the image and return it again.
+        def scalar(img):
+            return img
+
+        # tr_gen = ImageDataGenerator(preprocessing_function=scalar, horizontal_flip=True)
+        ts_gen = ImageDataGenerator(preprocessing_function=scalar)
+
+        # train_gen = tr_gen.flow_from_dataframe(train_df, x_col='filepaths', y_col='labels', target_size=img_size,
+        #                                        class_mode='categorical',
+        #                                        color_mode=color, shuffle=True, batch_size=batch_size)
+
+        valid_gen = ts_gen.flow_from_dataframe(valid_df, x_col='filepaths', y_col='labels', target_size=img_size,
+                                               class_mode='categorical',
+                                               color_mode=color, shuffle=True, batch_size=batch_size)
+
+        # Note: we will use custom test_batch_size, and make shuffle= false
+        test_gen = ts_gen.flow_from_dataframe(test_df, x_col='filepaths', y_col='labels', target_size=img_size,
+                                              class_mode='categorical',
+                                              color_mode=color, shuffle=False, batch_size=test_batch_size)
+
+        return valid_gen, test_gen

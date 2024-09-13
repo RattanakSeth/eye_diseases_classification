@@ -3,9 +3,9 @@ This project was edited from Kaggle for education purpose. You can read about te
 1. https://www.kaggle.com/code/mahnazarjmand/eye-diseases-classification
 2. https://www.kaggle.com/code/abdallahwagih/eye-diseases-classification-acc-93-8
 
-## => App
+## App
 ### packet for python version 3.12, tensorflow2.16.2
-1. pip install tensorflow
+1. pip install tensorflow==2.16.2
 2. pip install pandas
 3. pip install -U scikit-learn
 4. pip install pillow
